@@ -1,5 +1,6 @@
 # include <stdio.h>
 # include <vector>
+# include <array>
 # include <iostream>
 # include <algorithm>
 # include <random>
@@ -20,6 +21,43 @@ public:
             }
         }
     }
+
+    void selectionSort(vector<int>& nums){
+        if(nums.size()<2){
+            return;
+        }
+        for(int i=0; i<nums.size()-1; ++i){
+            int min_idx = i;
+            for(int j=i+1; j < nums.size(); ++j){
+                if(nums[j]<nums[min_idx]) 
+                    min_idx = j;
+            }
+            swap(nums[i], nums[min_idx]);
+        }
+    }
+
+    void insertionSort(vector<int>& nums){
+        if(nums.size()<2){
+            return;
+        }
+        for(int i=0; i<nums.size()-1; i++){
+            for(int j=i+1; j>0 && nums[j]<nums[j-1]; j--){
+                swap(nums[j], nums[j-1]);
+            }
+        }
+    }
+ 
+    // void insertionSort(vector<int>& nums){
+    //     if(nums.size()<2){
+    //         return;
+    //     }
+    //     for(int i=1; i<nums.size(); i++){
+    //         for(int j=i-1; j>=0 && nums[j+1]>nums[j]; j--){
+    //             swap(nums[j], nums[j+1]);
+    //         }
+    //     }
+    // }
+
 
     // merge sort
     void mergeSort(vector<int>& nums, int L, int R){
@@ -55,13 +93,74 @@ public:
 
     // quick sort
     void quickSort(vector<int>& nums){
-        if(nums.size()<2 || nums==NULL){
+        if(nums.size()<2){
             return;
         }
         quickSort_(nums, 0, nums.size()-1);
     }
 
-    
+    void quickSort_(vector<int>& nums, int l, int r){
+        if(l<r){
+            default_random_engine e(time(0));
+            uniform_int_distribution<unsigned> u(l, r-1);
+            swap(nums[u(e)], nums[r]);
+            array<int, 2> p = partition(nums, l, r);
+            quickSort_(nums, l, p[0]-1);
+            quickSort_(nums, p[1]+1, r);
+        }
+    }
+    array<int, 2> partition(vector<int>& nums, int l, int r){
+        int less = l-1, more = r;
+        while(l < more){
+            if(nums[l] < nums[r]){
+                swap(nums[++less], nums[l++]);
+            }
+            else if(nums[l]> nums[r]){
+                swap(nums[l], nums[--more]);
+            }
+            else l++;
+        }
+        swap(nums[more], nums[r]);
+        return array<int, 2> {less+1, more};
+    }
+
+    // heap sort
+    void heapSort(vector<int>& nums){
+        if(nums.size()<2){
+            return;
+        }
+        for(int index=0; index < nums.size(); index++){
+            heapInsert(nums, index);
+        }
+
+        int len = nums.size();
+        swap(nums[0], nums[--len]);
+        while(len>0){
+            heapify(nums, 0, len);
+            swap(nums[--len], nums[0]);
+        }
+    }
+
+    void heapInsert(vector<int>& nums, int index){
+        while(nums[index] > nums[(index-1)/2]){
+            swap(nums[index], nums[(index-1)/2]);
+            index = (index-1)/2;
+        }
+    }
+
+    void heapify(vector<int>& nums, int index, int len){
+        int left = 2*index +1;
+        while(left < len){
+            int largest = (left+1 < len && nums[left+1]>nums[left])?(left+1):left;
+            if(nums[largest] > nums[index]){
+                swap(nums[largest], nums[index]);
+                index = largest;
+                left = index*2+1; 
+            }
+            else break;
+        }
+
+    }
 
 
     // for test
@@ -111,15 +210,28 @@ int main(){
         vector<int> nums1 = sorter.generateRandomVector(maxSize, maxValue);
         vector<int> nums2(nums1);
         // sorter.bubbleSort(nums1);
-        sorter.mergeSort(nums1, 0, nums1.size()-1);
+        // sorter.selectionSort(nums1);
+        // sorter.insertionSort(nums1);
+        // sorter.mergeSort(nums1, 0, nums1.size()-1);
+        // sorter.quickSort(nums1);
+        sorter.heapSort(nums1);
         sorter.comparator(nums2);
         if(!sorter.isEqual(nums1, nums2)){
             succeed = false;
             cout << "Died at time "<< i << endl;
+            for(vector<int>::iterator v=nums1.begin(); v!=nums1.end(); v++){
+                cout <<"nums1: "<<*v;
+            }
+            cout<<endl;
+            for(vector<int>::iterator v=nums2.begin(); v!=nums2.end(); v++){
+                cout <<"nums2: "<<*v;
+            }
             break;
         }
     }
     succeed?(cout<<"Oh yes!"<<endl):(cout<<"Oh, fuck!" <<endl);
+    
+    cout<<endl;
     system("pause");
     return 0;
 }
