@@ -162,6 +162,29 @@ public:
 
     }
 
+    // bucket sort
+    void bucketSort(vector<int>& nums){
+        if(nums.size()<2)
+            return;
+        
+        int min_num = *min_element(nums.begin(), nums.end()), max_num = *max_element(nums.begin(),nums.end());
+        if(min_num == max_num)
+            return;
+        int size = max_num-min_num+1;
+        vector<int> bucket(size);
+        for(size_t i=0; i < nums.size(); i++){
+            bucket[nums[i]-min_num]++;
+        }
+        vector<int> help;
+        for(size_t i=0; i<size; i++){
+            while(bucket[i]>0){
+                help.push_back(min_num + i);
+                bucket[i]--;
+            }
+        }
+        nums = help;
+    }
+
 
     // for test
     void comparator(vector<int>& nums){
@@ -214,7 +237,8 @@ int main(){
         // sorter.insertionSort(nums1);
         // sorter.mergeSort(nums1, 0, nums1.size()-1);
         // sorter.quickSort(nums1);
-        sorter.heapSort(nums1);
+        // sorter.heapSort(nums1);
+        sorter.bucketSort(nums1);
         sorter.comparator(nums2);
         if(!sorter.isEqual(nums1, nums2)){
             succeed = false;
